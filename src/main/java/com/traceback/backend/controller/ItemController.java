@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/items")
@@ -51,5 +53,19 @@ public class ItemController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    @PostMapping("/{id}/images")
+    public ResponseEntity<ItemResponse> uploadImage(
+            @PathVariable String id,
+            @RequestParam("file") MultipartFile file,
+            Authentication authentication) throws IOException {
+
+        String ownerEmail = authentication.getName();
+
+        ItemResponse response =
+                itemService.uploadImage(id, file, ownerEmail);
+
+        return ResponseEntity.ok(response);
     }
 }
