@@ -29,4 +29,6 @@ public class ItemResponse {
     private List<String> imageKeys;
 
     private LocalDateTime createdAt;
+
+    private List<String> imageUrls;
 }

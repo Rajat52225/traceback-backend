@@ -89,6 +89,11 @@ public class ItemService {
 
     private ItemResponse toResponse(Item item) {
 
+        List<String> imageUrls = item.getImageKeys()
+                .stream()
+                .map(s3Service::generatePresignedUrl)
+                .toList();
+
         return new ItemResponse(
                 item.getId(),
                 item.getTitle(),
@@ -100,7 +105,9 @@ public class ItemService {
                 item.getEventDate(),
                 item.getOwnerEmail(),
                 item.getImageKeys(),
-                item.getCreatedAt()
+                item.getCreatedAt(),
+                imageUrls
+
         );
     }
 }
