@@ -18,4 +18,6 @@ public class ClaimResponse {
     private List<String> proofImageKeys;
     private ClaimStatus status;
     private LocalDateTime createdAt;
+
+    private List<String> proofImageUrls;
 }

@@ -40,8 +40,27 @@ public class ClaimService {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Item not found"));
 
+        if (item.getStatus() == ItemStatus.RESOLVED) {
+            throw new RuntimeException(
+                    "Cannot create a claim on a resolved item"
+            );
+        }
+
         if (item.getOwnerEmail().equals(claimantEmail)) {
             throw new RuntimeException("You cannot claim your own item");
+        }
+
+        boolean alreadyClaimed =
+                claimRepository.existsByItemIdAndClaimantEmailAndStatus(
+                        itemId,
+                        claimantEmail,
+                        ClaimStatus.PENDING
+                );
+
+        if (alreadyClaimed) {
+            throw new RuntimeException(
+                    "You already have a pending claim for this item"
+            );
         }
 
         Claim claim = new Claim();
@@ -100,8 +119,24 @@ public class ClaimService {
         claim.setStatus(newStatus);
 
         if (newStatus == ClaimStatus.ACCEPTED) {
+
             item.setStatus(ItemStatus.RESOLVED);
             itemRepository.save(item);
+
+            List<Claim> pendingClaims =
+                    claimRepository.findByItemIdAndStatus(
+                            item.getId(),
+                            ClaimStatus.PENDING
+                    );
+
+            for (Claim otherClaim : pendingClaims) {
+
+                if (!otherClaim.getId().equals(claim.getId())) {
+                    otherClaim.setStatus(ClaimStatus.REJECTED);
+                }
+            }
+
+            claimRepository.saveAll(pendingClaims);
         }
 
         Claim savedClaim = claimRepository.save(claim);
@@ -138,7 +173,47 @@ public class ClaimService {
         return toResponse(savedClaim);
     }
 
+    public ClaimResponse deleteProofImage(
+            String claimId,
+            String imageKey,
+            String claimantEmail) {
+
+        Claim claim = claimRepository.findById(claimId)
+                .orElseThrow(() -> new RuntimeException("Claim not found"));
+
+        if (!claim.getClaimantEmail().equals(claimantEmail)) {
+            throw new RuntimeException(
+                    "You are not allowed to delete proof from this claim"
+            );
+        }
+
+        if (claim.getStatus() != ClaimStatus.PENDING) {
+            throw new RuntimeException(
+                    "Cannot delete proof after claim has been processed"
+            );
+        }
+
+        if (!claim.getProofImageKeys().contains(imageKey)) {
+            throw new RuntimeException(
+                    "Proof image not found in this claim"
+            );
+        }
+
+        s3Service.deleteFile(imageKey);
+
+        claim.getProofImageKeys().remove(imageKey);
+
+        Claim savedClaim = claimRepository.save(claim);
+
+        return toResponse(savedClaim);
+    }
+
     private ClaimResponse toResponse(Claim claim) {
+
+        List<String> proofImageUrls = claim.getProofImageKeys()
+                .stream()
+                .map(s3Service::generatePresignedUrl)
+                .toList();
 
         return new ClaimResponse(
                 claim.getId(),
@@ -147,7 +222,8 @@ public class ClaimService {
                 claim.getMessage(),
                 claim.getProofImageKeys(),
                 claim.getStatus(),
-                claim.getCreatedAt()
+                claim.getCreatedAt(),
+                proofImageUrls
         );
     }
 }

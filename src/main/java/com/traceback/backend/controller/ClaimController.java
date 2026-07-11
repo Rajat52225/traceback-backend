@@ -12,6 +12,7 @@ import java.util.List;
 import com.traceback.backend.model.ClaimStatus;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/claims")
@@ -86,6 +87,24 @@ public class ClaimController {
                 claimService.uploadProofImage(
                         claimId,
                         file,
+                        claimantEmail
+                );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{claimId}/proof-images")
+    public ResponseEntity<ClaimResponse> deleteProofImage(
+            @PathVariable String claimId,
+            @RequestParam String imageKey,
+            Authentication authentication) {
+
+        String claimantEmail = authentication.getName();
+
+        ClaimResponse response =
+                claimService.deleteProofImage(
+                        claimId,
+                        imageKey,
                         claimantEmail
                 );
 
