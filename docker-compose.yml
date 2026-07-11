@@ -1,0 +1,24 @@
+services:
+  mongo:
+    image: mongo:8
+    container_name: traceback-mongo
+    restart: unless-stopped
+    volumes:
+      - traceback-mongo-data:/data/db
+
+  backend:
+    image: traceback-backend:latest
+    container_name: traceback-backend
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    ports:
+      - "8080:8080"
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/traceback_db
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ap-south-1
+
+volumes:
+  traceback-mongo-data:
