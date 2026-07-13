@@ -66,7 +66,8 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "http://localhost:3000",
                 "http://localhost:30080",
-                "https://traceback-frontend-wine.vercel.app"
+                "https://traceback-frontend-wine.vercel.app",
+                "https://traceback-frontend-cpsxv5jli-rajat5225.vercel.app"
         ));
 
         configuration.setAllowedMethods(
