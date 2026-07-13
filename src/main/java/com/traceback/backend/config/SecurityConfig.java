@@ -65,7 +65,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "http://localhost:3000",
-                "http://localhost:30080"
+                "http://localhost:30080",
+                "https://traceback-frontend-wine.vercel.app"
         ));
 
         configuration.setAllowedMethods(
