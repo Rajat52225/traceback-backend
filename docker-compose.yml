@@ -20,5 +20,14 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_REGION: ap-south-1
 
+  frontend:
+    image: traceback-frontend:latest
+    container_name: traceback-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
 volumes:
   traceback-mongo-data:

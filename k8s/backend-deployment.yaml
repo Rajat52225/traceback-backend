@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traceback-backend
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: traceback-backend
+
+  template:
+    metadata:
+      labels:
+        app: traceback-backend
+
+    spec:
+      containers:
+        - name: backend
+          image: traceback-backend:latest
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 8080
+
+          env:
+            - name: MONGODB_URI
+              value: mongodb://traceback-mongo-service:27017/traceback_db
+
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: traceback-aws-secret
+                  key: AWS_ACCESS_KEY_ID
+
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: traceback-aws-secret
+                  key: AWS_SECRET_ACCESS_KEY
+
+            - name: AWS_REGION
+              value: ap-south-1

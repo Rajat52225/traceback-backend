@@ -34,3 +34,15 @@ build/
 
 ### Environment Variables ###
 .env
+
+### Secrets / Local config ###
+.env.*
+!.env.example
+*.pem
+*.key
+application-local.properties
+application-local.yml
+
+### Kubernetes local secret manifests ###
+k8s/*secret*.yaml
+k8s/*secret*.yml

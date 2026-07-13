@@ -27,6 +27,7 @@ public class ClaimController {
     @GetMapping("/items/{itemId}")
     public ResponseEntity<List<ClaimResponse>> getClaimsForItem(
             @PathVariable String itemId,
+
             Authentication authentication) {
 
         String ownerEmail = authentication.getName();
